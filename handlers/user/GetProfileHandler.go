@@ -2,7 +2,7 @@ package user
 
 import (
 	"database/sql"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/middleware/auth"
 	"net/http"
@@ -24,9 +24,9 @@ func GetProfileHandler(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Get user from database
-		user, err := db.GetUserByID(database, claims.UserID)
+		user, err := queries.GetUserByID(database, claims.UserID)
 		if err != nil {
-			if err == db.ErrUserNotFound {
+			if err == queries.ErrUserNotFound {
 				handlers.RespondJSON(w, http.StatusNotFound, map[string]string{"error": "user not found"})
 				return
 			}

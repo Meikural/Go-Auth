@@ -3,7 +3,7 @@ package admin
 import (
 	"database/sql"
 	"encoding/json"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/middleware/auth"
 	"go-auth/models"
@@ -76,9 +76,9 @@ func UpdateUserRoleHandler(database *sql.DB, availableRoles []string) http.Handl
 		}
 
 		// Get current user to verify they're not removing the last super admin
-		targetUser, err := db.GetUserByID(database, userID)
+		targetUser, err := queries.GetUserByID(database, userID)
 		if err != nil {
-			if err == db.ErrUserNotFound {
+			if err == queries.ErrUserNotFound {
 				handlers.RespondJSON(w, http.StatusNotFound, map[string]string{"error": "user not found"})
 				return
 			}
@@ -89,7 +89,7 @@ func UpdateUserRoleHandler(database *sql.DB, availableRoles []string) http.Handl
 		// Prevent removing super admin role if they're the last one
 		if strings.EqualFold(targetUser.Role, availableRoles[0]) && !strings.EqualFold(req.Role, availableRoles[0]) {
 			// Check if there are other super admins
-			allUsers, _ := db.GetAllUsers(database)
+			allUsers, _ := queries.GetAllUsers(database)
 			superAdminCount := 0
 			for _, u := range allUsers {
 				if strings.EqualFold(u.Role, availableRoles[0]) {
@@ -103,9 +103,9 @@ func UpdateUserRoleHandler(database *sql.DB, availableRoles []string) http.Handl
 		}
 
 		// Update user role
-		updatedUser, err := db.UpdateUserRole(database, userID, req.Role)
+		updatedUser, err := queries.UpdateUserRole(database, userID, req.Role)
 		if err != nil {
-			if err == db.ErrUserNotFound {
+			if err == queries.ErrUserNotFound {
 				handlers.RespondJSON(w, http.StatusNotFound, map[string]string{"error": "user not found"})
 				return
 			}

@@ -3,11 +3,11 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/middleware/auth"
 	"go-auth/models"
-	"go-auth/utils"
+	"go-auth/utils/password"
 	"net/http"
 )
 
@@ -39,9 +39,9 @@ func ChangePasswordHandler(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Get user
-		user, err := db.GetUserByID(database, claims.UserID)
+		user, err := queries.GetUserByID(database, claims.UserID)
 		if err != nil {
-			if err == db.ErrUserNotFound {
+			if err == queries.ErrUserNotFound {
 				handlers.RespondJSON(w, http.StatusUnauthorized, map[string]string{"error": "user not found"})
 				return
 			}
@@ -50,20 +50,20 @@ func ChangePasswordHandler(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Verify old password
-		if !utils.VerifyPassword(user.Password, req.OldPassword) {
+		if !password.VerifyPassword(user.Password, req.OldPassword) {
 			handlers.RespondJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid password"})
 			return
 		}
 
 		// Hash new password
-		hashedPassword, err := utils.HashPassword(req.NewPassword)
+		hashedPassword, err := password.HashPassword(req.NewPassword)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to hash password"})
 			return
 		}
 
 		// Update password
-		if err := db.UpdatePassword(database, claims.UserID, hashedPassword); err != nil {
+		if err := queries.UpdatePassword(database, claims.UserID, hashedPassword); err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to update password"})
 			return
 		}

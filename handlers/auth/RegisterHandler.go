@@ -3,10 +3,11 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/models"
-	"go-auth/utils"
+	"go-auth/utils/jwt"
+	"go-auth/utils/password"
 	"net/http"
 )
 
@@ -31,16 +32,16 @@ func RegisterHandler(database *sql.DB, secretKey, defaultRole string) http.Handl
 		}
 
 		// Hash password
-		hashedPassword, err := utils.HashPassword(req.Password)
+		hashedPassword, err := password.HashPassword(req.Password)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to hash password"})
 			return
 		}
 
 		// Create user with default role
-		user, err := db.CreateUser(database, req.Username, req.Email, hashedPassword, defaultRole)
+		user, err := queries.CreateUser(database, req.Username, req.Email, hashedPassword, defaultRole)
 		if err != nil {
-			if err == db.ErrUserExists {
+			if err == queries.ErrUserExists {
 				handlers.RespondJSON(w, http.StatusConflict, map[string]string{"error": "user already exists"})
 				return
 			}
@@ -49,13 +50,13 @@ func RegisterHandler(database *sql.DB, secretKey, defaultRole string) http.Handl
 		}
 
 		// Generate tokens
-		accessToken, err := utils.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.AccessToken, secretKey)
+		accessToken, err := jwt.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.AccessToken, secretKey)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to generate access token"})
 			return
 		}
 
-		refreshToken, err := utils.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.RefreshToken, secretKey)
+		refreshToken, err := jwt.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.RefreshToken, secretKey)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to generate refresh token"})
 			return

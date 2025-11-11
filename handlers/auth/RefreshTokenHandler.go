@@ -3,10 +3,10 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/models"
-	"go-auth/utils"
+	"go-auth/utils/jwt"
 	"net/http"
 )
 
@@ -30,9 +30,9 @@ func RefreshTokenHandler(database *sql.DB, secretKey string) http.HandlerFunc {
 		}
 
 		// Verify refresh token
-		claims, err := utils.VerifyToken(req.RefreshToken, secretKey)
+		claims, err := jwt.VerifyToken(req.RefreshToken, secretKey)
 		if err != nil {
-			if err == utils.ErrExpiredToken {
+			if err == jwt.ErrExpiredToken {
 				handlers.RespondJSON(w, http.StatusUnauthorized, map[string]string{"error": "refresh token expired"})
 				return
 			}
@@ -47,9 +47,9 @@ func RefreshTokenHandler(database *sql.DB, secretKey string) http.HandlerFunc {
 		}
 
 		// Get user to ensure they still exist
-		user, err := db.GetUserByID(database, claims.UserID)
+		user, err := queries.GetUserByID(database, claims.UserID)
 		if err != nil {
-			if err == db.ErrUserNotFound {
+			if err == queries.ErrUserNotFound {
 				handlers.RespondJSON(w, http.StatusUnauthorized, map[string]string{"error": "user not found"})
 				return
 			}
@@ -58,7 +58,7 @@ func RefreshTokenHandler(database *sql.DB, secretKey string) http.HandlerFunc {
 		}
 
 		// Generate new access token
-		accessToken, err := utils.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.AccessToken, secretKey)
+		accessToken, err := jwt.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.AccessToken, secretKey)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to generate access token"})
 			return

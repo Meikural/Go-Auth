@@ -2,7 +2,8 @@ package main
 
 import (
 	"go-auth/config"
-	authdb "go-auth/db"
+	seeder "go-auth/db/Seeder"
+	authdb "go-auth/db/database"
 	"go-auth/handlers"
 	"go-auth/handlers/admin"
 	"go-auth/handlers/auth"
@@ -40,7 +41,7 @@ func main() {
 	log.Println("Tables created/verified")
 
 	// Seed roles
-	if err := authdb.SeedRoles(database, cfg.Roles); err != nil {
+	if err := seeder.SeedRoles(database, cfg.Roles); err != nil {
 		log.Fatalf("Failed to seed roles: %v", err)
 	}
 
@@ -48,7 +49,7 @@ func main() {
 
 	// Seed super admin
 	superAdminRole := cfg.Roles[0] // First role is Super Admin
-	if err := authdb.SeedSuperAdmin(database, cfg.SuperAdminEmail, cfg.SuperAdminPassword, superAdminRole); err != nil {
+	if err := seeder.SeedSuperAdmin(database, cfg.SuperAdminEmail, cfg.SuperAdminPassword, superAdminRole); err != nil {
 		log.Fatalf("Failed to seed super admin: %v", err)
 	}
 

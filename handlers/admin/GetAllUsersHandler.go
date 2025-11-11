@@ -2,7 +2,7 @@ package admin
 
 import (
 	"database/sql"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/models"
 	"net/http"
@@ -18,7 +18,7 @@ func GetAllUsersHandler(database *sql.DB) http.HandlerFunc {
 		}
 
 		// Get all users
-		users, err := db.GetAllUsers(database)
+		users, err := queries.GetAllUsers(database)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to get users"})
 			return

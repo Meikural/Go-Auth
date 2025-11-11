@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"go-auth/middleware/constants"
 	"go-auth/models"
-	"go-auth/utils"
+	"go-auth/utils/jwt"
 	"net/http"
 	"strings"
 )
@@ -31,9 +31,9 @@ func AuthMiddleware(secretKey string) func(http.Handler) http.Handler {
 			tokenString := parts[1]
 
 			// Verify token
-			claims, err := utils.VerifyToken(tokenString, secretKey)
+			claims, err := jwt.VerifyToken(tokenString, secretKey)
 			if err != nil {
-				if err == utils.ErrExpiredToken {
+				if err == jwt.ErrExpiredToken {
 					constants.RespondError(w, http.StatusUnauthorized, "token expired")
 					return
 				}

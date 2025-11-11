@@ -3,10 +3,11 @@ package auth
 import (
 	"database/sql"
 	"encoding/json"
-	"go-auth/db"
+	queries "go-auth/db/Queries"
 	"go-auth/handlers"
 	"go-auth/models"
-	"go-auth/utils"
+	"go-auth/utils/jwt"
+	"go-auth/utils/password"
 	"net/http"
 )
 
@@ -31,9 +32,9 @@ func LoginHandler(database *sql.DB, secretKey string) http.HandlerFunc {
 		}
 
 		// Get user by email
-		user, err := db.GetUserByEmail(database, req.Email)
+		user, err := queries.GetUserByEmail(database, req.Email)
 		if err != nil {
-			if err == db.ErrUserNotFound {
+			if err == queries.ErrUserNotFound {
 				handlers.RespondJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
 				return
 			}
@@ -42,19 +43,19 @@ func LoginHandler(database *sql.DB, secretKey string) http.HandlerFunc {
 		}
 
 		// Verify password
-		if !utils.VerifyPassword(user.Password, req.Password) {
+		if !password.VerifyPassword(user.Password, req.Password) {
 			handlers.RespondJSON(w, http.StatusUnauthorized, map[string]string{"error": "invalid credentials"})
 			return
 		}
 
 		// Generate tokens
-		accessToken, err := utils.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.AccessToken, secretKey)
+		accessToken, err := jwt.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.AccessToken, secretKey)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to generate access token"})
 			return
 		}
 
-		refreshToken, err := utils.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.RefreshToken, secretKey)
+		refreshToken, err := jwt.GenerateToken(user.ID, user.Username, user.Email, user.Role, models.RefreshToken, secretKey)
 		if err != nil {
 			handlers.RespondJSON(w, http.StatusInternalServerError, map[string]string{"error": "failed to generate refresh token"})
 			return
