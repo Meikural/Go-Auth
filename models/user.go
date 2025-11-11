@@ -8,8 +8,15 @@ type User struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"` // Never expose password in JSON
+	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// Role represents a role in the system
+type Role struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
 }
 
 // RegisterRequest is the payload for user registration

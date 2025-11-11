@@ -16,7 +16,7 @@ var (
 )
 
 // GenerateToken creates a JWT token with the given claims
-func GenerateToken(userID int, username, email string, tokenType models.TokenType, secretKey string) (string, error) {
+func GenerateToken(userID int, username, email, role string, tokenType models.TokenType, secretKey string) (string, error) {
 	var expirationTime time.Time
 
 	// Set expiration based on token type
@@ -30,6 +30,7 @@ func GenerateToken(userID int, username, email string, tokenType models.TokenTyp
 		UserID:    userID,
 		Username:  username,
 		Email:     email,
+		Role:      role,
 		TokenType: tokenType,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
