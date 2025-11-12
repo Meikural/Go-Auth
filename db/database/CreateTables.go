@@ -21,7 +21,7 @@ func CreateTables(db *sql.DB) error {
 		return fmt.Errorf("failed to create roles table: %w", err)
 	}
 
-	// Create users table with role reference
+	// Create users table with role reference and soft delete
 	createUsersTable := `
 	CREATE TABLE IF NOT EXISTS users (
 		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -29,6 +29,7 @@ func CreateTables(db *sql.DB) error {
 		email VARCHAR(100) UNIQUE NOT NULL,
 		password VARCHAR(255) NOT NULL,
 		role VARCHAR(100) DEFAULT 'User',
+		deleted_at TIMESTAMP,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);

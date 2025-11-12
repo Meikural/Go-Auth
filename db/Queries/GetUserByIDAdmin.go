@@ -6,14 +6,14 @@ import (
 	"go-auth/models"
 )
 
-// GetUserByID retrieves a user by ID (excludes soft-deleted users)
-func GetUserByID(db *sql.DB, id string) (*models.User, error) {
+// GetUserByIDAdmin retrieves a user by ID for admin (includes deleted users info)
+func GetUserByIDAdmin(db *sql.DB, id string) (*models.User, error) {
 	user := &models.User{}
 
 	query := `
 	SELECT id, username, email, password, role, deleted_at, created_at, updated_at
 	FROM users
-	WHERE id = $1 AND deleted_at IS NULL
+	WHERE id = $1
 	`
 
 	err := db.QueryRow(query, id).Scan(
@@ -34,5 +34,6 @@ func GetUserByID(db *sql.DB, id string) (*models.User, error) {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
 
+	user.Password = "" // Don't expose password
 	return user, nil
 }

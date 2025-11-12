@@ -2,7 +2,6 @@ package auth
 
 import (
 	"context"
-	"fmt"
 	"go-auth/middleware/constants"
 	"go-auth/models"
 	"go-auth/utils/jwt"
@@ -52,7 +51,7 @@ func AuthMiddleware(secretKey string) func(http.Handler) http.Handler {
 			r = r.WithContext(ctx)
 
 			// Also store in headers for easier access
-			r.Header.Set("X-User-ID", fmt.Sprintf("%d", claims.UserID))
+			r.Header.Set("X-User-ID", claims.UserID)
 			r.Header.Set("X-Username", claims.Username)
 			r.Header.Set("X-Email", claims.Email)
 			r.Header.Set("X-Role", claims.Role)

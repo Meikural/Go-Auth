@@ -71,8 +71,24 @@ func main() {
 
 	// Admin routes (authentication + role required)
 	roleMiddleware := middleware.RequireRole(superAdminRole)
+	
+	// Get all users
 	mux.Handle("/admin/users", authMiddleware(roleMiddleware(http.HandlerFunc(admin.GetAllUsersHandler(database)))))
-	mux.Handle("/admin/users/", authMiddleware(roleMiddleware(http.HandlerFunc(admin.UpdateUserRoleHandler(database, cfg.Roles)))))
+	
+	// Get specific user: GET /admin/users/get/{uuid}
+	mux.Handle("/admin/users/get/", authMiddleware(roleMiddleware(http.HandlerFunc(admin.GetUserHandler(database)))))
+	
+	// Create user: POST /admin/users/create
+	mux.Handle("/admin/users/create", authMiddleware(roleMiddleware(http.HandlerFunc(admin.CreateUserHandler(database, cfg.Roles)))))
+	
+	// Update user: PATCH /admin/users/update/{uuid}
+	mux.Handle("/admin/users/update/", authMiddleware(roleMiddleware(http.HandlerFunc(admin.UpdateUserHandler(database)))))
+	
+	// Delete user: DELETE /admin/users/delete/{uuid}
+	mux.Handle("/admin/users/delete/", authMiddleware(roleMiddleware(http.HandlerFunc(admin.DeleteUserHandler(database)))))
+	
+	// Update user role: PUT /admin/users/role/{uuid}
+	mux.Handle("/admin/users/role/", authMiddleware(roleMiddleware(http.HandlerFunc(admin.UpdateUserRoleHandler(database, cfg.Roles)))))
 
 	// Start server
 	log.Printf("Starting auth service on port %s", cfg.ServerPort)

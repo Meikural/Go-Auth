@@ -175,7 +175,7 @@ def test_update_user_role(super_admin_token, user_id, new_role, role_name):
             "role": new_role
         }
         response = requests.put(
-            f"{AUTH_SERVICE_URL}/admin/users/{user_id}/role",
+            f"{AUTH_SERVICE_URL}/admin/users/role/{user_id}",
             json=payload,
             headers=headers
         )
@@ -340,6 +340,124 @@ def test_get_all_users(super_admin_token):
         print_error(f"Get all users error: {e}")
         return False
 
+def test_create_user_admin(super_admin_token, username, email, password, role):
+    print_header(f"Testing Create User - {username} ({role})")
+    try:
+        headers = {
+            "Authorization": f"Bearer {super_admin_token}"
+        }
+        payload = {
+            "username": username,
+            "email": email,
+            "password": password,
+            "role": role
+        }
+        response = requests.post(
+            f"{AUTH_SERVICE_URL}/admin/users/create",
+            json=payload,
+            headers=headers
+        )
+        
+        if response.status_code == 201:
+            data = response.json()
+            print_success("User created successfully by admin")
+            print(f"User ID: {data['id']}")
+            print(f"Username: {data['username']}")
+            print(f"Email: {data['email']}")
+            print(f"Role: {data['role']}")
+            return {
+                "id": data['id'],
+                "username": data['username'],
+                "email": data['email'],
+                "role": data['role']
+            }
+        else:
+            print_error(f"Create user failed: {response.text}")
+            return None
+    except Exception as e:
+        print_error(f"Create user error: {e}")
+        return None
+
+def test_get_user_admin(super_admin_token, user_id, expected_username):
+    print_header(f"Testing Get User - {expected_username}")
+    try:
+        headers = {
+            "Authorization": f"Bearer {super_admin_token}"
+        }
+        response = requests.get(
+            f"{AUTH_SERVICE_URL}/admin/users/get/{user_id}",
+            headers=headers
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("User retrieved successfully")
+            print(f"User ID: {data['id']}")
+            print(f"Username: {data['username']}")
+            print(f"Email: {data['email']}")
+            print(f"Role: {data['role']}")
+            print(f"Deleted At: {data.get('deleted_at')}")
+            return True
+        else:
+            print_error(f"Get user failed: {response.text}")
+            return False
+    except Exception as e:
+        print_error(f"Get user error: {e}")
+        return False
+
+def test_update_user_admin(super_admin_token, user_id, new_username, new_email):
+    print_header(f"Testing Update User - {user_id}")
+    try:
+        headers = {
+            "Authorization": f"Bearer {super_admin_token}"
+        }
+        payload = {
+            "username": new_username,
+            "email": new_email
+        }
+        response = requests.patch(
+            f"{AUTH_SERVICE_URL}/admin/users/update/{user_id}",
+            json=payload,
+            headers=headers
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("User updated successfully")
+            print(f"New Username: {data['username']}")
+            print(f"New Email: {data['email']}")
+            print(f"Role: {data['role']}")
+            return True
+        else:
+            print_error(f"Update user failed: {response.text}")
+            return False
+    except Exception as e:
+        print_error(f"Update user error: {e}")
+        return False
+
+def test_delete_user_admin(super_admin_token, user_id, username):
+    print_header(f"Testing Delete User (Soft Delete) - {username}")
+    try:
+        headers = {
+            "Authorization": f"Bearer {super_admin_token}"
+        }
+        response = requests.delete(
+            f"{AUTH_SERVICE_URL}/admin/users/delete/{user_id}",
+            headers=headers
+        )
+        
+        if response.status_code == 200:
+            data = response.json()
+            print_success("User deleted successfully (soft delete)")
+            print(f"Message: {data['message']}")
+            return True
+        else:
+            print_error(f"Delete user failed: {response.text}")
+            return False
+    except Exception as e:
+        print_error(f"Delete user error: {e}")
+        return False
+
 def test_unauthorized_access_to_admin_endpoint(user_token, username):
     print_header(f"Testing Unauthorized Access - {username} accessing admin endpoint")
     try:
@@ -373,7 +491,7 @@ def test_unauthorized_role_update(user_token, target_user_id, new_role, username
             "role": new_role
         }
         response = requests.put(
-            f"{AUTH_SERVICE_URL}/admin/users/{target_user_id}/role",
+            f"{AUTH_SERVICE_URL}/admin/users/role/{target_user_id}",
             json=payload,
             headers=headers
         )
@@ -526,6 +644,42 @@ def main():
     # Test Get All Users endpoint
     if super_admin_data:
         test_get_all_users(super_admin_data["access_token"])
+
+    # Test User Management endpoints
+    print_header("Testing User Management APIs")
+    
+    if super_admin_data:
+        # Create a test user via admin
+        admin_created_user = test_create_user_admin(
+            super_admin_data["access_token"],
+            "admincreateduser",
+            "admincreateduser@example.com",
+            "adminpass123",
+            "User"
+        )
+        
+        if admin_created_user:
+            # Get the user
+            test_get_user_admin(
+                super_admin_data["access_token"],
+                admin_created_user["id"],
+                admin_created_user["username"]
+            )
+            
+            # Update the user
+            test_update_user_admin(
+                super_admin_data["access_token"],
+                admin_created_user["id"],
+                "adminupdateduser",
+                "adminupdated@example.com"
+            )
+            
+            # Delete the user
+            test_delete_user_admin(
+                super_admin_data["access_token"],
+                admin_created_user["id"],
+                admin_created_user["username"]
+            )
 
     # Test unauthorized access to admin endpoints
     print_header("Testing Authorization & Access Control")

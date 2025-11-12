@@ -4,13 +4,14 @@ import "time"
 
 // User represents a user in the system
 type User struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	Password  string    `json:"-"` // Never expose password in JSON
-	Role      string    `json:"role"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        string     `json:"id"`
+	Username  string     `json:"username"`
+	Email     string     `json:"email"`
+	Password  string     `json:"-"` // Never expose password in JSON
+	Role      string     `json:"role"`
+	DeletedAt *time.Time `json:"deleted_at"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }
 
 // Role represents a role in the system
@@ -48,4 +49,10 @@ type AuthResponse struct {
 // RefreshTokenRequest is the payload for refreshing tokens
 type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token"`
+}
+
+// UpdateUserRequest is the payload for updating user details
+type UpdateUserRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
 }

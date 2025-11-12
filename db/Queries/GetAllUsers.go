@@ -6,11 +6,12 @@ import (
 	"go-auth/models"
 )
 
-// GetAllUsers retrieves all users from the database
+// GetAllUsers retrieves all users from the database (excludes soft-deleted users)
 func GetAllUsers(db *sql.DB) ([]*models.User, error) {
 	query := `
-	SELECT id, username, email, password, role, created_at, updated_at
+	SELECT id, username, email, password, role, deleted_at, created_at, updated_at
 	FROM users
+	WHERE deleted_at IS NULL
 	ORDER BY created_at DESC
 	`
 
@@ -29,6 +30,7 @@ func GetAllUsers(db *sql.DB) ([]*models.User, error) {
 			&user.Email,
 			&user.Password,
 			&user.Role,
+			&user.DeletedAt,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 		)
