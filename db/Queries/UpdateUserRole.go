@@ -8,7 +8,7 @@ import (
 )
 
 // UpdateUserRole updates a user's role
-func UpdateUserRole(db *sql.DB, userID int, newRole string) (*models.User, error) {
+func UpdateUserRole(db *sql.DB, userID string, newRole string) (*models.User, error) {
 	user := &models.User{}
 
 	query := `

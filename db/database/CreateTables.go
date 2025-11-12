@@ -10,7 +10,7 @@ func CreateTables(db *sql.DB) error {
 	// Create roles table
 	createRolesTable := `
 	CREATE TABLE IF NOT EXISTS roles (
-		id SERIAL PRIMARY KEY,
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		name VARCHAR(100) UNIQUE NOT NULL,
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);
@@ -24,7 +24,7 @@ func CreateTables(db *sql.DB) error {
 	// Create users table with role reference
 	createUsersTable := `
 	CREATE TABLE IF NOT EXISTS users (
-		id SERIAL PRIMARY KEY,
+		id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 		username VARCHAR(100) UNIQUE NOT NULL,
 		email VARCHAR(100) UNIQUE NOT NULL,
 		password VARCHAR(255) NOT NULL,

@@ -8,7 +8,7 @@ import (
 )
 
 // GenerateToken creates a JWT token with the given claims
-func GenerateToken(userID int, username, email, role string, tokenType models.TokenType, secretKey string) (string, error) {
+func GenerateToken(userID string, username, email, role string, tokenType models.TokenType, secretKey string) (string, error) {
 	var expirationTime time.Time
 
 	// Set expiration based on token type

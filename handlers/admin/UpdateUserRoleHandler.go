@@ -8,7 +8,6 @@ import (
 	"go-auth/middleware/auth"
 	"go-auth/models"
 	"net/http"
-	"strconv"
 	"strings"
 )
 
@@ -28,16 +27,15 @@ func UpdateUserRoleHandler(database *sql.DB, availableRoles []string) http.Handl
 		}
 
 		// Extract user ID from URL path
-		// Expected format: /admin/users/123/role
+		// Expected format: /admin/users/uuid-string/role
 		pathParts := strings.Split(r.URL.Path, "/")
 		if len(pathParts) < 4 {
 			handlers.RespondJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid path"})
 			return
 		}
 
-		userIDStr := pathParts[3]
-		userID, err := strconv.Atoi(userIDStr)
-		if err != nil {
+		userID := pathParts[3]
+		if userID == "" {
 			handlers.RespondJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid user id"})
 			return
 		}

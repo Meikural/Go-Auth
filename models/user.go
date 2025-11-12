@@ -4,7 +4,7 @@ import "time"
 
 // User represents a user in the system
 type User struct {
-	ID        int       `json:"id"`
+	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Password  string    `json:"-"` // Never expose password in JSON
@@ -15,7 +15,7 @@ type User struct {
 
 // Role represents a role in the system
 type Role struct {
-	ID   int    `json:"id"`
+	ID   string `json:"id"`
 	Name string `json:"name"`
 }
 

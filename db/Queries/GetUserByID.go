@@ -7,7 +7,7 @@ import (
 )
 
 // GetUserByID retrieves a user by ID
-func GetUserByID(db *sql.DB, id int) (*models.User, error) {
+func GetUserByID(db *sql.DB, id string) (*models.User, error) {
 	user := &models.User{}
 
 	query := `

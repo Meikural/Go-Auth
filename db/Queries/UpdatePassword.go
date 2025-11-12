@@ -7,7 +7,7 @@ import (
 )
 
 // UpdatePassword updates a user's password
-func UpdatePassword(db *sql.DB, userID int, hashedPassword string) error {
+func UpdatePassword(db *sql.DB, userID string, hashedPassword string) error {
 	query := `
 	UPDATE users
 	SET password = $1, updated_at = $2
